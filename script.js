@@ -1,222 +1,115 @@
-// Global variables
-let todos = [];
-let todoIdCounter = 1;
-let editingId = null;
-
-// DOM elements
-const todoInput = document.getElementById('todoInput');
-const addBtn = document.getElementById('addBtn');
-const todoList = document.getElementById('todoList');
-const emptyState = document.getElementById('emptyState');
-const stats = document.getElementById('stats');
-const clearBtn = document.getElementById('clearBtn');
-
-// localStorage keys
-const TODOS_KEY = 'todos';
-const COUNTER_KEY = 'todoIdCounter';
-
-// Event listeners
-addBtn.addEventListener('click', addTodo);
-clearBtn.addEventListener('click', clearAllTodos);
-todoInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        addTodo();
-    }
-});
-
-// localStorage functions
-function saveTodos() {
-    localStorage.setItem(TODOS_KEY, JSON.stringify(todos));
-    localStorage.setItem(COUNTER_KEY, todoIdCounter.toString());
-}
-
-function loadTodos() {
-    const savedTodos = localStorage.getItem(TODOS_KEY);
-    const savedCounter = localStorage.getItem(COUNTER_KEY);
-    
-    if (savedTodos) {
-        todos = JSON.parse(savedTodos);
-    }
-    
-    if (savedCounter) {
-        todoIdCounter = parseInt(savedCounter);
-    }
-}
-
-function clearAllTodos() {
-    if (confirm('Are you sure you want to clear all todos? This cannot be undone.')) {
-        todos = [];
-        todoIdCounter = 1;
-        editingId = null;
-        saveTodos();
-        renderTodos();
-        updateStats();
-    }
-}
-
-// Add todo function
-function addTodo() {
-    const todoText = todoInput.value.trim();
-    
-    if (todoText === '') {
-        alert('Please enter a task!');
-        return;
-    }
-
-    const todo = {
-        id: todoIdCounter++,
-        text: todoText,
-        completed: false,
-        createdAt: new Date().toISOString()
-    };
-
-    todos.push(todo);
-    todoInput.value = '';
-    saveTodos();
-    renderTodos();
-    updateStats();
-}
-
-// Render todos function
-function renderTodos() {
-    todoList.innerHTML = '';
-
-    if (todos.length === 0) {
-        todoList.appendChild(emptyState);
-        return;
-    }
-
-    todos.forEach(todo => {
-        const todoItem = document.createElement('div');
-        todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-        
-        if (editingId === todo.id) {
-            todoItem.innerHTML = `
-                <input type="text" class="edit-input" value="${todo.text}" id="editInput-${todo.id}">
-                <div class="todo-actions">
-                    <button class="action-btn save-btn" onclick="saveEdit(${todo.id})">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button class="action-btn cancel-btn" onclick="cancelEdit()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-        } else {
-            todoItem.innerHTML = `
-                <span class="todo-text">${todo.text}</span>
-                <div class="todo-actions">
-                    <button class="action-btn complete-btn ${todo.completed ? 'completed' : ''}" onclick="toggleComplete(${todo.id})">
-                        <i class="fas ${todo.completed ? 'fa-undo' : 'fa-check'}"></i>
-                    </button>
-                    <button class="action-btn edit-btn" onclick="editTodo(${todo.id})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="deleteTodo(${todo.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-        }
-        
-        todoList.appendChild(todoItem);
-    });
-}
-
-// Toggle complete function
-function toggleComplete(id) {
-    todos = todos.map(todo => {
-        if (todo.id === id) {
-            todo.completed = !todo.completed;
-            todo.completedAt = todo.completed ? new Date().toISOString() : null;
-        }
-        return todo;
-    });
-    saveTodos();
-    renderTodos();
-    updateStats();
-}
-
-// Delete todo function
-function deleteTodo(id) {
-    if (confirm('Are you sure you want to delete this task?')) {
-        todos = todos.filter(todo => todo.id !== id);
-        editingId = null;
-        saveTodos();
-        renderTodos();
-        updateStats();
-    }
-}
-
-// Edit todo function
-function editTodo(id) {
-    editingId = id;
-    renderTodos();
-    // Focus on the edit input
-    setTimeout(() => {
-        const editInput = document.getElementById(`editInput-${id}`);
-        if (editInput) {
-            editInput.focus();
-            editInput.select();
-        }
-    }, 0);
-}
-
-// Save edit function
-function saveEdit(id) {
-    const editInput = document.getElementById(`editInput-${id}`);
-    const newText = editInput.value.trim();
-    
-    if (newText === '') {
-        alert('Task cannot be empty!');
-        return;
-    }
-
-    todos = todos.map(todo => {
-        if (todo.id === id) {
-            todo.text = newText;
-            todo.updatedAt = new Date().toISOString();
-        }
-        return todo;
-    });
-
-    editingId = null;
-    saveTodos();
-    renderTodos();
-    updateStats();
-}
-
-// Cancel edit function
-function cancelEdit() {
-    editingId = null;
-    renderTodos();
-}
-
-// Handle Enter key in edit input
-document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter' && editingId && e.target.classList.contains('edit-input')) {
-        saveEdit(editingId);
-    }
-    if (e.key === 'Escape' && editingId) {
-        cancelEdit();
-    }
-});
-
-// Update stats function
-function updateStats() {
-    const total = todos.length;
-    const completed = todos.filter(todo => todo.completed).length;
-    const remaining = total - completed;
-    
-    stats.textContent = `Total: ${total} tasks • Completed: ${completed} • Remaining: ${remaining}`;
-}
-
+// Toggle modal visibility
 function toggleModal() {
   const modal = document.getElementById('taskModal');
   modal.classList.toggle('hidden');
 }
-// Initialize
-loadTodos();
-renderTodos();
-updateStats();
-toggleModal();
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.remove('hidden', 'opacity-0', 'translate-y-[-30px]');
+  toast.classList.add('opacity-100', 'translate-y-0');
+
+  setTimeout(() => {
+    toast.classList.remove('opacity-100', 'translate-y-0');
+    toast.classList.add('opacity-0', 'translate-y-[-30px]');
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 500);
+  }, 3000);
+}
+
+let editingTaskSpan = null; // null = add mode
+
+function createTaskItem(taskText) {
+  const li = document.createElement('li');
+  li.className = 'bg-gray-100 p-4 rounded flex justify-between items-center';
+
+  li.innerHTML = `
+    <div class="flex items-center space-x-4">
+      <input type="checkbox" class="custom-radio w-5 h-5 cursor-pointer" />
+      <span class="task-text text-black text-lg">${taskText}</span>
+    </div>
+    <div class="task-actions flex items-center space-x-4">
+      <button title="Edit">
+        <img src="public/edit.png" alt="Edit" class="w-5 h-5" />
+      </button>
+      <button title="Delete" class="delete-btn">
+        <img src="public/trash-2.png" alt="Delete" class="w-5 h-5" />
+      </button>
+    </div>
+  `;
+
+    const checkbox = li.querySelector('input[type="checkbox"]');
+    const taskSpan = li.querySelector('.task-text');
+    const taskActions = li.querySelector('.task-actions');
+    const deleteBtn = li.querySelector('.delete-btn');
+
+    // Delete logic
+    deleteBtn.addEventListener('click', () => {
+        li.remove(); // Removes the task
+        showToast('Task deleted successfully');
+    });
+
+    // Check/Uncheck logic
+    checkbox.addEventListener('change', () => {
+        if (checkbox.checked) {
+        taskSpan.classList.add('line-through', 'text-gray-400');
+        taskActions.classList.add('hidden');
+        } else {
+        taskSpan.classList.remove('line-through', 'text-gray-400');
+        taskActions.classList.remove('hidden');
+        }
+    });
+
+    const editBtn = li.querySelector('button[title="Edit"]');
+    editBtn.addEventListener('click', () => {
+    // Set modal to edit mode
+    editingTaskSpan = taskSpan;
+    document.getElementById('todoInput').value = taskSpan.textContent;
+
+    // Toggle buttons
+    document.getElementById('addBtn').classList.add('hidden');
+    document.getElementById('saveBtn').classList.remove('hidden');
+
+    // Open modal
+    toggleModal();
+    });
+
+    return li;
+}
+
+// Handle add task logic
+document.getElementById('addBtn').addEventListener('click', () => {
+  const input = document.getElementById('todoInput');
+  const taskText = input.value.trim();
+  if (!taskText) return;
+
+  const taskList = document.getElementById('taskList');
+  const li = createTaskItem(taskText);
+  taskList.appendChild(li);
+
+  input.value = '';
+  toggleModal();
+  showToast('Task added successfully!');
+});
+
+document.getElementById('saveBtn').addEventListener('click', () => {
+  const input = document.getElementById('todoInput');
+  const newText = input.value.trim();
+
+  if (newText && editingTaskSpan) {
+    editingTaskSpan.textContent = newText;
+    showToast('Task updated successfully');
+  }
+
+  // Reset state
+  editingTaskSpan = null;
+  input.value = '';
+
+  // Toggle buttons
+  document.getElementById('addBtn').classList.remove('hidden');
+  document.getElementById('saveBtn').classList.add('hidden');
+
+  toggleModal();
+});

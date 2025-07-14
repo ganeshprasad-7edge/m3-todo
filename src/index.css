@@ -6,3 +6,28 @@
   --color-primary: #007272;
   --color-secondary: #7D7878;
 }
+
+/* Tailwind base if using CDN */
+.custom-radio {
+  appearance: none;
+  border: 2px solid #333;
+  border-radius: 9999px;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-content: center;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-radio:checked {
+  border-color: #047857; /* emerald-700 */
+  background-color: #047857;
+}
+
+.custom-radio:checked::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: white;
+}

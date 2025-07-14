@@ -1,33 +1,68 @@
-// Toggle modal visibility
+// Toggle modal visibility when adding/editing tasks
 function toggleModal() {
   const modal = document.getElementById('taskModal');
   modal.classList.toggle('hidden');
 }
 
+// Display a toast notification that automatically disappears after 3 seconds
 function showToast(message) {
   const toast = document.getElementById('toast');
   toast.textContent = message;
-  toast.classList.remove('hidden', 'opacity-0', 'translate-y-[-30px]');
-  toast.classList.add('opacity-100', 'translate-y-0');
 
+  // Show toast and animate it sliding in from top
+  toast.classList.remove('hidden');
+  requestAnimationFrame(() => {
+    toast.classList.remove('opacity-0', '-translate-y-8');
+    toast.classList.add('opacity-100', 'translate-y-0');
+  });
+
+  // Hide toast after 3 seconds with slide-out animation
   setTimeout(() => {
     toast.classList.remove('opacity-100', 'translate-y-0');
-    toast.classList.add('opacity-0', 'translate-y-[-30px]');
+    toast.classList.add('opacity-0', '-translate-y-8');
+
+    // Completely hide toast after animation finishes
     setTimeout(() => {
       toast.classList.add('hidden');
     }, 500);
   }, 3000);
 }
 
-let editingTaskSpan = null; // null = add mode
+// Track which task is currently being edited
+let editingTaskSpan = null; // null indicates we're in "add new task" mode
 
+// Load saved tasks from browser storage when page loads
+function loadTasks() {
+  const tasks = JSON.parse(localStorage.getItem('todoTasks') || '[]');
+  const taskList = document.getElementById('taskList');
+  tasks.forEach(task => {
+    const li = createTaskItem(task.text);
+    if (task.completed) {
+      li.setChecked(true);
+    }
+    taskList.appendChild(li);
+  });
+}
+
+// Save current tasks to browser storage
+function saveTasks() {
+  const taskList = document.getElementById('taskList');
+  const tasks = Array.from(taskList.children).map(li => ({
+    text: li.querySelector('.task-text').textContent,
+    completed: li.isChecked()
+  }));
+  localStorage.setItem('todoTasks', JSON.stringify(tasks));
+}
+
+// Create a new task list item with checkbox, text, edit and delete buttons
 function createTaskItem(taskText) {
   const li = document.createElement('li');
   li.className = 'bg-gray-100 p-4 rounded flex justify-between items-center';
 
+  // Create task item HTML structure
   li.innerHTML = `
     <div class="flex items-center space-x-4">
-      <input type="checkbox" class="custom-radio w-5 h-5 cursor-pointer" />
+      <img class="checkbox-img w-5 h-5 cursor-pointer" src="public/checkbox-blank-circle.png" alt="checkbox" />
       <span class="task-text text-black text-lg">${taskText}</span>
     </div>
     <div class="task-actions flex items-center space-x-4">
@@ -40,46 +75,68 @@ function createTaskItem(taskText) {
     </div>
   `;
 
-    const checkbox = li.querySelector('input[type="checkbox"]');
+    // Get references to task item elements
+    const checkboxImg = li.querySelector('.checkbox-img');
     const taskSpan = li.querySelector('.task-text');
     const taskActions = li.querySelector('.task-actions');
     const deleteBtn = li.querySelector('.delete-btn');
+    let isChecked = false;
 
-    // Delete logic
+    // Handle task deletion
     deleteBtn.addEventListener('click', () => {
-        li.remove(); // Removes the task
+        li.remove();
+        saveTasks();
         showToast('Task deleted successfully');
     });
 
-    // Check/Uncheck logic
-    checkbox.addEventListener('change', () => {
-        if (checkbox.checked) {
-        taskSpan.classList.add('line-through', 'text-gray-400');
-        taskActions.classList.add('hidden');
+    // Handle task completion toggling
+    checkboxImg.addEventListener('click', () => {
+        isChecked = !isChecked;
+        if (isChecked) {
+            checkboxImg.src = 'public/checkbox-circle-line.png';
+            taskSpan.classList.add('line-through', 'text-gray-400');
+            taskActions.style.visibility = 'hidden';
+            taskActions.style.pointerEvents = 'none';
         } else {
-        taskSpan.classList.remove('line-through', 'text-gray-400');
-        taskActions.classList.remove('hidden');
+            checkboxImg.src = 'public/checkbox-blank-circle.png';
+            taskSpan.classList.remove('line-through', 'text-gray-400');
+            taskActions.style.visibility = 'visible';
+            taskActions.style.pointerEvents = 'auto';
         }
+        saveTasks();
     });
 
+    // Methods to get/set task completion status
+    li.isChecked = () => isChecked;
+    li.setChecked = (checked) => {
+        isChecked = checked;
+        if (checked) {
+            checkboxImg.src = 'public/checkbox-marked-circle.png';
+            taskSpan.classList.add('line-through', 'text-gray-400');
+            taskActions.style.visibility = 'hidden';
+            taskActions.style.pointerEvents = 'none';
+        }
+    };
+
+    // Handle task editing
     const editBtn = li.querySelector('button[title="Edit"]');
     editBtn.addEventListener('click', () => {
-    // Set modal to edit mode
+    // Prepare modal for editing
     editingTaskSpan = taskSpan;
     document.getElementById('todoInput').value = taskSpan.textContent;
 
-    // Toggle buttons
+    // Show save button and hide add button
     document.getElementById('addBtn').classList.add('hidden');
     document.getElementById('saveBtn').classList.remove('hidden');
 
-    // Open modal
+    // Show the modal
     toggleModal();
     });
 
     return li;
 }
 
-// Handle add task logic
+// Handle adding new tasks
 document.getElementById('addBtn').addEventListener('click', () => {
   const input = document.getElementById('todoInput');
   const taskText = input.value.trim();
@@ -89,27 +146,49 @@ document.getElementById('addBtn').addEventListener('click', () => {
   const li = createTaskItem(taskText);
   taskList.appendChild(li);
 
+  saveTasks();
   input.value = '';
   toggleModal();
   showToast('Task added successfully!');
 });
 
+// Handle saving edited tasks
 document.getElementById('saveBtn').addEventListener('click', () => {
   const input = document.getElementById('todoInput');
   const newText = input.value.trim();
 
   if (newText && editingTaskSpan) {
     editingTaskSpan.textContent = newText;
+    saveTasks();
     showToast('Task updated successfully');
   }
 
-  // Reset state
+  // Reset the form state
   editingTaskSpan = null;
   input.value = '';
 
-  // Toggle buttons
+  // Restore button visibility
   document.getElementById('addBtn').classList.remove('hidden');
   document.getElementById('saveBtn').classList.add('hidden');
 
   toggleModal();
+});
+
+// Update the date display with today's date
+function setTodaysDate() {
+  const today = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const formattedDate = today.toLocaleDateString('en-US', options);
+  
+  // Update all date display elements
+  const dateElements = document.querySelectorAll('#date');
+  dateElements.forEach(element => {
+    element.textContent = formattedDate;
+  });
+}
+
+// Initialize the app when page loads
+document.addEventListener('DOMContentLoaded', () => {
+  setTodaysDate();
+  loadTasks();
 });

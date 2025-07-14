@@ -2,26 +2,32 @@
 <html lang="en">
 
 <head>
+  <!-- Meta tags for character encoding and responsive viewport -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Todo List</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- External CSS dependencies -->
   <link rel="stylesheet" href="src/index.css">
 </head>
 
 <body>
+  <!-- Header section with logo and title -->
   <header class="h-[79px] bg-primary w-full text-white flex justify-start items-center">
-    <img src="public/Logo.png" alt="To-Do" class="inline-block h-8 ml-20">
+    <img src="Logo.png" alt="To-Do" class="inline-block h-8 ml-20">
     <h1 class="inline-block text-2xl font-semibold ml-3.5">To-Do List</h1>
   </header>
+
+  <!-- Main content section with date and add task button -->
   <div class="mx-20 mt-12">
     <div class="flex justify-between items-center">
       <div>
         <div class="text-black font-bold text-2xl">Today</div>
+        <!-- Dynamic date display -->
         <div id="date" class="text-secondary mt-2">March 4, 2010</div>
       </div>
+      <!-- Button to open the add task modal -->
       <button onclick="toggleModal()"
-        class="bg-primary text-white p-2 rounded-lg text-[16px] w-[180px] h-[54px] flex items-center justify-center">
+        class="bg-primary text-white p-2 rounded-lg text-[16px] w-[180px] h-[54px] flex items-center justify-center cursor-pointer">
         <span class="flex items-center leading-none">
           Add New Task
           <span class="text-[26px] ml-2 leading-none relative top-[-2px]">+</span>
@@ -29,37 +35,46 @@
       </button>
     </div>
   </div>
+
+  <!-- Container for the list of tasks -->
   <ul id="taskList" class="mt-8 space-y-4 mx-20"></ul>
-  <!-- Modal Overlay (just below header) -->
+
+  <!-- Modal for adding/editing tasks -->
   <div id="taskModal"
     class="absolute top-[79px] left-0 w-full h-[calc(100%-79px)] bg-white z-30 hidden flex justify-center px-10 items-start pt-10">
     <div class="bg-white w-full p-10 rounded-lg relative">
-      <!-- Close Button -->
-      <button class="absolute top-4 right-4 text-black w-[36px] h-[36px] text-5xl"
+      <!-- Modal close button -->
+      <button class="absolute top-4 right-4 text-black w-[36px] h-[36px] text-5xl cursor-pointer"
         onclick="toggleModal()">&times;</button>
 
-      <!-- Modal Content -->
+      <!-- Modal header with date -->
       <div class="text-black font-bold text-xl mb-3">Today</div>
       <div id="date" class="text-secondary mb-6">March 4, 2010</div>
+
+      <!-- Task input field -->
       <input id="todoInput" type="text" placeholder="Add new task....."
         class="w-full border-l-2 border-black pl-4 text-[36px] mb-[396px] h-[44px] text-black font-semibold outline-none" />
+
+      <!-- Action buttons container -->
       <div class="flex justify-center">
-        <!-- Add Task Button -->
-        <button id="addBtn" class="bg-primary text-white py-3 px-6 rounded-md text-[18px] w-[384px] h-[60px]">Add
+        <!-- Button for adding new tasks -->
+        <button id="addBtn" class="bg-primary text-white py-3 px-6 rounded-md text-[18px] w-[384px] h-[60px] cursor-pointer">Add
           task</button>
 
-        <!-- Save Changes Button (hidden initially) -->
+        <!-- Button for saving edited tasks (hidden by default) -->
         <button id="saveBtn"
-          class="bg-primary text-white py-3 px-6 rounded-md text-[18px] w-[384px] h-[60px] hidden">Save changes</button>
+          class="bg-primary text-white py-3 px-6 rounded-md text-[18px] w-[384px] h-[60px] hidden cursor-pointer">Save changes</button>
       </div>
     </div>
   </div>
-  <!-- Toast -->
+
+  <!-- Toast notification for success messages -->
   <div id="toast"
     class="fixed top-6 right-6 bg-black h-[40px] w-[300px] text-white px-4 py-2 rounded shadow-md z-50 transform opacity-0 -translate-y-8 transition-all duration-500 ease-in-out hidden">
     Task added successfully
   </div>
 
+  <!-- JavaScript file for functionality -->
   <script src="script.js"></script>
 </body>
 

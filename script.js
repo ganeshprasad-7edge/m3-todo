@@ -62,15 +62,15 @@ function createTaskItem(taskText) {
   // Create task item HTML structure
   li.innerHTML = `
     <div class="flex items-center space-x-4">
-      <img class="checkbox-img w-5 h-5 cursor-pointer" src="public/checkbox-blank-circle.png" alt="checkbox" />
+      <img class="checkbox-img w-5 h-5 cursor-pointer" src="checkbox-blank-circle.png" alt="checkbox" />
       <span class="task-text text-black text-lg">${taskText}</span>
     </div>
     <div class="task-actions flex items-center space-x-4">
-      <button title="Edit">
-        <img src="public/edit.png" alt="Edit" class="w-5 h-5" />
+      <button title="Edit" class="cursor-pointer">
+        <img src="edit.png" alt="Edit" class="w-5 h-5" />
       </button>
-      <button title="Delete" class="delete-btn">
-        <img src="public/trash-2.png" alt="Delete" class="w-5 h-5" />
+      <button title="Delete" class="delete-btn cursor-pointer">
+        <img src="trash-2.png" alt="Delete" class="w-5 h-5" />
       </button>
     </div>
   `;
@@ -91,17 +91,25 @@ function createTaskItem(taskText) {
 
     // Handle task completion toggling
     checkboxImg.addEventListener('click', () => {
+        const taskList = document.getElementById('taskList');
         isChecked = !isChecked;
         if (isChecked) {
-            checkboxImg.src = 'public/checkbox-circle-line.png';
+            checkboxImg.src = 'checkbox-circle-line.png';
             taskSpan.classList.add('line-through', 'text-gray-400');
             taskActions.style.visibility = 'hidden';
             taskActions.style.pointerEvents = 'none';
+            // Move to bottom
+            taskList.appendChild(li);
         } else {
-            checkboxImg.src = 'public/checkbox-blank-circle.png';
+            checkboxImg.src = 'checkbox-blank-circle.png';
             taskSpan.classList.remove('line-through', 'text-gray-400');
             taskActions.style.visibility = 'visible';
             taskActions.style.pointerEvents = 'auto';
+            // Move to top (before first completed task)
+            const firstCompleted = Array.from(taskList.children).find(item => item.isChecked());
+            if (firstCompleted) {
+                taskList.insertBefore(li, firstCompleted);
+            }
         }
         saveTasks();
     });
@@ -111,7 +119,7 @@ function createTaskItem(taskText) {
     li.setChecked = (checked) => {
         isChecked = checked;
         if (checked) {
-            checkboxImg.src = 'public/checkbox-marked-circle.png';
+            checkboxImg.src = 'checkbox-circle-line.png';
             taskSpan.classList.add('line-through', 'text-gray-400');
             taskActions.style.visibility = 'hidden';
             taskActions.style.pointerEvents = 'none';
@@ -121,16 +129,16 @@ function createTaskItem(taskText) {
     // Handle task editing
     const editBtn = li.querySelector('button[title="Edit"]');
     editBtn.addEventListener('click', () => {
-    // Prepare modal for editing
-    editingTaskSpan = taskSpan;
-    document.getElementById('todoInput').value = taskSpan.textContent;
+      // Prepare modal for editing
+      editingTaskSpan = taskSpan;
+      document.getElementById('todoInput').value = taskSpan.textContent;
 
-    // Show save button and hide add button
-    document.getElementById('addBtn').classList.add('hidden');
-    document.getElementById('saveBtn').classList.remove('hidden');
+      // Show save button and hide add button
+      document.getElementById('addBtn').classList.add('hidden');
+      document.getElementById('saveBtn').classList.remove('hidden');
 
-    // Show the modal
-    toggleModal();
+      // Show the modal
+      toggleModal();
     });
 
     return li;
@@ -144,7 +152,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
 
   const taskList = document.getElementById('taskList');
   const li = createTaskItem(taskText);
-  taskList.appendChild(li);
+  taskList.insertBefore(li, taskList.firstChild);
 
   saveTasks();
   input.value = '';

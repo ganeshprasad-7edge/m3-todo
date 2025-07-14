@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Todo List</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>My Todo List</h1>
-        
-        <div class="input-container">
-            <input type="text" id="todoInput" placeholder="Enter a new task..." maxlength="100">
-            <button id="addBtn"><i class="fas fa-plus"></i></button>
-        </div>
-        
-        <div class="todo-list" id="todoList">
-            <div class="empty-state" id="emptyState">
-                No tasks yet. Add one above!
-            </div>
-        </div>
-        
-        <div class="stats" id="stats">
-            Total: 0 tasks
-        </div>
-        
-        <div class="clear-section">
-            <button id="clearBtn" class="clear-btn">
-                <i class="fas fa-trash-alt"></i> Clear All
-            </button>
-        </div>
-    </div>
 
-    <script src="script.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Todo List</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="src/index.css">
+</head>
+
+<body>
+  <header class="h-[79px] bg-primary w-full text-white flex justify-start items-center">
+    <img src="public/Logo.png" alt="To-Do" class="inline-block h-8 ml-20">
+    <h1 class="inline-block text-2xl font-semibold ml-3.5">To-Do List</h1>
+  </header>
+  <div class="mx-20 mt-12">
+    <div class="flex justify-between items-center">
+      <div>
+        <div class="text-black font-bold text-2xl">Today</div>
+        <div class="text-secondary mt-2">March 4, 2010</div>
+      </div>
+      <div>
+        <button onclick="toggleModal()" class="bg-primary text-white p-2 rounded-lg text-[16px] w-[180px] h-[54px]">Add
+          New Task <span class="text-[26px] ml-1.5">+</span></button>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Overlay (just below header) -->
+  <div id="taskModal"
+    class="absolute top-[79px] left-0 w-full h-[calc(100%-79px)] bg-white z-30 hidden flex justify-center px-10 items-start pt-10">
+    <div class="bg-white w-full p-10 rounded-lg relative">
+      <!-- Close Button -->
+      <button class="absolute top-4 right-4 text-black w-[36px] h-[36px] text-5xl" onclick="toggleModal()">&times;</button>
+
+      <!-- Modal Content -->
+      <div class="text-black font-bold text-xl mb-3">Today</div>
+      <div class="text-secondary mb-6">March 4, 2010</div>
+      <input type="text" placeholder="Add new task....." class="w-full border-l-2 border-black pl-4 text-[36px] mb-[396px] h-[44px] text-black font-semibold outline-none"/>
+      <div class="flex justify-center">
+      <button class="bg-primary text-white py-3 px-6 rounded-md text-[18px] w-[384px] h-[60px]">Add task</button>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
+
 </html>

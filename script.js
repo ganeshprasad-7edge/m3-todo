@@ -211,7 +211,12 @@ function updateStats() {
     stats.textContent = `Total: ${total} tasks • Completed: ${completed} • Remaining: ${remaining}`;
 }
 
+function toggleModal() {
+  const modal = document.getElementById('taskModal');
+  modal.classList.toggle('hidden');
+}
 // Initialize
 loadTodos();
 renderTodos();
 updateStats();
+toggleModal();
